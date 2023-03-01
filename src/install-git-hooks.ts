@@ -6,6 +6,7 @@ main()
 
 async function main() {
 	const currentDirectoryPath = process.cwd()
+	console.log('Found', currentDirectoryPath)
 	if (fp.basename(fp.dirname(currentDirectoryPath)) !== 'node_modules') {
 		console.log('Do nothing when running this on semantic-version repository.')
 		return
@@ -52,6 +53,6 @@ async function upsert(filePath: string, text: string) {
 
 	if (index === -1) {
 		await fs.appendFile(filePath, '\n' + text + '\n', 'utf-8')
-		console.log('Added', text, 'to', filePath)
+		console.log(`Added "${text}" to ${filePath}`)
 	}
 }
