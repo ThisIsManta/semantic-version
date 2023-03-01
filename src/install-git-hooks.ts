@@ -5,16 +5,19 @@ import { execaCommand } from 'execa'
 main()
 
 async function main() {
-	let workingPath = process.cwd()
-	if (fp.basename(fp.dirname(workingPath)) !== 'node_modules') {
+	const currentDirectoryPath = process.cwd()
+	if (fp.basename(fp.dirname(currentDirectoryPath)) !== 'node_modules') {
 		console.log('Do nothing when running this on semantic-version repository.')
 		return
 	}
 
-	workingPath = fp.resolve(workingPath, '../..')
-	const huskyDirectoryPath = fp.resolve(workingPath, '.husky')
-
+	console.log('Installing Husky')
 	await execaCommand('npx husky install')
+
+	// Up 3 levels because of `node_modules/@thisismanta/semantic-version`
+	const huskyDirectoryPath = fp.resolve(currentDirectoryPath, '../../..', '.husky')
+	await fs.access(huskyDirectoryPath)
+	console.log('Found', huskyDirectoryPath)
 
 	await upsert(
 		fp.join(huskyDirectoryPath, 'commit-msg'),
@@ -25,6 +28,8 @@ async function main() {
 		fp.join(huskyDirectoryPath, 'post-commit'),
 		'npx auto-npm-version'
 	)
+
+	console.log('Done adding Git hooks.')
 }
 
 async function upsert(filePath: string, text: string) {
