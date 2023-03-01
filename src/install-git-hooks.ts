@@ -1,10 +1,20 @@
 import * as fs from 'fs/promises'
 import * as fp from 'path'
+import { execaCommand } from 'execa'
 
 main()
 
 async function main() {
-	const huskyDirectoryPath = fp.resolve(process.cwd(), '.husky')
+	let workingPath = process.cwd()
+	if (fp.basename(fp.dirname(workingPath)) !== 'node_modules') {
+		console.log('Do nothing when running this on semantic-version repository.')
+		return
+	}
+
+	workingPath = fp.resolve(workingPath, '../..')
+	const huskyDirectoryPath = fp.resolve(workingPath, '.husky')
+
+	await execaCommand('npx husky install')
 
 	await upsert(
 		fp.join(huskyDirectoryPath, 'commit-msg'),

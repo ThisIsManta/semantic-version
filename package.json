@@ -22,8 +22,7 @@
 		"preversion": "npm run test && npm run build && git add lib/*",
 		"version": "npm publish --access public",
 		"postversion": "git push --tags origin master",
-		"postinstall": "husky install && node ./lib/install-git-hooks.js",
-		"prepare": "husky uninstall && rm -rf .husky"
+		"postinstall": "node ./lib/install-git-hooks.js"
 	},
 	"devDependencies": {
 		"@types/jest": "^29.4.0",
