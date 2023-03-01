@@ -23,10 +23,9 @@ async function main() {
 	console.log('Installing Husky')
 	await execaCommand('npx husky install', { cwd: gitDirectoryPath })
 
-	// Up 3 levels because of `node_modules/@thisismanta/semantic-version`
-	const huskyDirectoryPath = fp.resolve(currentDirectoryPath, '../../..', '.husky')
+	const huskyDirectoryPath = fp.resolve(gitDirectoryPath, '.husky')
+	console.debug('huskyDirectoryPath »', huskyDirectoryPath)
 	await fs.access(huskyDirectoryPath)
-	console.log('Found', huskyDirectoryPath)
 
 	await upsert(
 		fp.join(huskyDirectoryPath, 'commit-msg'),
