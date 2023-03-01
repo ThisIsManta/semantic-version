@@ -6,14 +6,22 @@ main()
 
 async function main() {
 	const currentDirectoryPath = process.cwd()
-	console.log('Found', currentDirectoryPath)
-	if (fp.basename(fp.dirname(currentDirectoryPath)) !== 'node_modules') {
-		console.log('Do nothing when running this on semantic-version repository.')
+	console.debug('currentDirectoryPath »', currentDirectoryPath)
+
+	const gitDirectoryPath = await findGitDirectoryPath(currentDirectoryPath)
+	console.debug('gitDirectoryPath »', gitDirectoryPath)
+	if (!gitDirectoryPath) {
+		throw new Error('Could not find a Git directory.')
+	}
+
+	const packageJSON = JSON.parse(await fs.readFile(fp.join(gitDirectoryPath, 'package.json'), 'utf-8'))
+	if (packageJSON.name === '@thisismanta/semantic-version') {
+		console.warn('Skip installing Git hooks as it is supposed to be done on a consumer repository.')
 		return
 	}
 
 	console.log('Installing Husky')
-	await execaCommand('npx husky install')
+	await execaCommand('npx husky install', { cwd: gitDirectoryPath })
 
 	// Up 3 levels because of `node_modules/@thisismanta/semantic-version`
 	const huskyDirectoryPath = fp.resolve(currentDirectoryPath, '../../..', '.husky')
@@ -31,6 +39,28 @@ async function main() {
 	)
 
 	console.log('Done adding Git hooks.')
+}
+
+async function findGitDirectoryPath(path: string) {
+	const pathList = path.split(fp.sep)
+	while (pathList.length > 1) {
+		const testPath = fp.join(pathList.join(fp.sep), '.git')
+
+		try {
+			await fs.access(testPath)
+			const stat = await fs.lstat(testPath)
+			if (stat.isDirectory()) {
+				return pathList.join(fp.sep)
+			}
+
+		} catch {
+			// Do nothing
+		}
+
+		pathList.pop()
+	}
+
+	return null
 }
 
 async function upsert(filePath: string, text: string) {
