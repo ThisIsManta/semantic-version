@@ -4,9 +4,12 @@ export const allowedTypes = ['feat', 'fix', 'test', 'refactor', 'chore']
 
 export function checkConventionalMessage(message: string, { debug }: Pick<Console, 'debug'>) {
 	const pattern: { [key: string]: string | undefined } = (message.match(titlePattern)?.groups || {})
-	debug(JSON.stringify(pattern, null, 2))
 
 	const { type, scope, breaking, subject } = pattern
+	debug('type »', type)
+	debug('scope »', scope)
+	debug('breaking »', breaking)
+	debug('subject »', subject)
 
 	const errors = [
 		!type &&

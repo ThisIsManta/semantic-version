@@ -1,21 +1,25 @@
 import * as fs from 'fs/promises'
 import * as fp from 'path'
 import { execaCommand } from 'execa'
+import { debug } from './debug'
 
 main()
 
+const packageName = require('../package.json').name
+
 async function main() {
 	const currentDirectoryPath = process.cwd()
-	console.debug('currentDirectoryPath »', currentDirectoryPath)
+	debug('currentDirectoryPath »', currentDirectoryPath)
 
 	const gitDirectoryPath = await findGitDirectoryPath(currentDirectoryPath)
-	console.debug('gitDirectoryPath »', gitDirectoryPath)
+	debug('gitDirectoryPath »', gitDirectoryPath)
+
 	if (!gitDirectoryPath) {
 		throw new Error('Could not find a Git directory.')
 	}
 
 	const packageJSON = JSON.parse(await fs.readFile(fp.join(gitDirectoryPath, 'package.json'), 'utf-8'))
-	if (packageJSON.name === '@thisismanta/semantic-version') {
+	if (packageJSON.name === packageName) {
 		console.warn('Skip installing Git hooks as it is supposed to be done on a consumer repository.')
 		return
 	}
@@ -24,7 +28,8 @@ async function main() {
 	await execaCommand('npx husky install', { cwd: gitDirectoryPath })
 
 	const huskyDirectoryPath = fp.resolve(gitDirectoryPath, '.husky')
-	console.debug('huskyDirectoryPath »', huskyDirectoryPath)
+	debug('huskyDirectoryPath »', huskyDirectoryPath)
+
 	await fs.access(huskyDirectoryPath)
 
 	await upsert(
@@ -65,14 +70,15 @@ async function findGitDirectoryPath(path: string) {
 async function upsert(filePath: string, text: string) {
 	try {
 		await fs.access(filePath)
+		console.log('Found', filePath)
 	} catch (error) {
-		console.log('Created', filePath)
 		await fs.writeFile(
 			filePath,
 			'#!/usr/bin/env sh' + '\n' +
 			'. "$(dirname -- "$0")/_/husky.sh"' + '\n',
 			'utf-8'
 		)
+		console.log('Created', filePath)
 	}
 
 	const fileText = await fs.readFile(filePath, 'utf-8')
