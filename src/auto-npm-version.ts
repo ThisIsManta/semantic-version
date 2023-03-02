@@ -14,14 +14,15 @@ async function main() {
 		throw new Error('Expect to have a valid "version" field in package.json.')
 	}
 
-	const commits = (
-		await run(`git log v${lastVersion}..HEAD --format="%H %s"`)
-	)
-		.trim()
+	const commits = (await run(`git log v${lastVersion}..HEAD --format=%H%s`))
 		.split('\n')
-		.map(line => {
-			const hash = line.substring(0, line.indexOf(' '))
-			const message = line.substring(line.indexOf(' ') + 1)
+		.filter(line => line.length > 0)
+		.map(line => ({
+			hash: line.substring(0, 40),
+			message: line.substring(40),
+		}))
+		.filter(({ message }) => semver.valid(message) === null)
+		.map(({ hash, message }) => {
 			const { type, breaking, subject } = checkConventionalMessage(message, { debug })
 
 			return {
@@ -31,8 +32,9 @@ async function main() {
 				subject,
 			}
 		})
-	console.log(`Found ${commits.length} commits since ${lastVersion}`)
+	console.log(`Found ${commits.length} commits since v${lastVersion}`)
 	debug('commits »', JSON.stringify(commits, null, 2))
+	return
 
 	const releaseType = commits.reduce((releaseType: 'major' | 'minor' | 'patch' | null, { type, breaking }) => {
 		if (releaseType === 'major' || breaking) {
@@ -94,7 +96,7 @@ async function main() {
 			.join('\n\n')
 		debug('releaseNote »', releaseNote)
 
-		const octokit = github.getOctokit(process.env.GITHUB_TOKEN)
+		const octokit = github.getOctokit(process.env.GITHUB_TOKEN!)
 
 		// See https://octokit.github.io/rest.js/v19#repos-create-release
 		const releaseRespond = await octokit.rest.repos.createRelease({
