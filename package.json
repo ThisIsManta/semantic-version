@@ -1,6 +1,6 @@
 {
 	"name": "@thisismanta/semantic-version",
-	"version": "2.0.0-4",
+	"version": "2.0.0-5",
 	"author": "Anantachai Saothong <thisismanta@gmail.com>",
 	"license": "ISC",
 	"engines": {
