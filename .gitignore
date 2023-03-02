@@ -47,6 +47,9 @@ typings/
 # Optional REPL history
 .node_repl_history
 
+# Output of 'npm run build'
+lib/
+
 # Output of 'npm pack'
 *.tgz
 
