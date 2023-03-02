@@ -7,6 +7,8 @@ import { debug } from './debug'
 main()
 
 async function main() {
+	debug('cwd', process.cwd())
+	debug('ver', await run('npm pkg get version'))
 	const lastVersion = semver.valid(await run('npm pkg get version'))
 	debug('lastVersion »', JSON.stringify(lastVersion))
 
