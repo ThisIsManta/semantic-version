@@ -7,12 +7,7 @@ import { debug } from './debug'
 main()
 
 async function main() {
-	await run('git fetch --tags')
-
-	const lastVersion = semver.valid(
-		await run('git describe --tags --abbrev=0') ||
-		await run('npm pkg get version')
-	)
+	const lastVersion = semver.valid(await run('npm pkg get version'))
 	debug('lastVersion »', JSON.stringify(lastVersion))
 
 	if (!lastVersion) {
