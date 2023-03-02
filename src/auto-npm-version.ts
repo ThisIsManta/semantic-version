@@ -46,7 +46,7 @@ async function main() {
 			return releaseType
 		}
 
-		if (type === 'fix') {
+		if (type === 'fix' || type === 'refactor') {
 			return 'patch'
 		}
 
