@@ -7,6 +7,8 @@ import { debug } from './debug'
 main()
 
 async function main() {
+	await run('git fetch --tags')
+
 	const lastVersion = semver.valid(
 		await run('git describe --tags --abbrev=0') ||
 		await run('npm pkg get version')
@@ -100,12 +102,12 @@ async function main() {
 		const octokit = github.getOctokit(process.env.GITHUB_TOKEN)
 
 		// See https://octokit.github.io/rest.js/v19#repos-create-release
-		const octokitRespond = await octokit.rest.repos.createRelease({
+		const releaseRespond = await octokit.rest.repos.createRelease({
 			...github.context.repo,
 			tag_name: nextVersion,
 			body: releaseNote,
 		})
-		debug('octokitRespond »', JSON.stringify(octokitRespond, null, 2))
+		debug('releaseRespond »', JSON.stringify(releaseRespond, null, 2))
 		console.log('Created a new release on GitHub')
 	}
 }
