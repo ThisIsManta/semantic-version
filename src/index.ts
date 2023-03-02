@@ -12,6 +12,7 @@ export function checkConventionalMessage(message: string, { debug }: Pick<Consol
 	debug('subject »', subject)
 
 	const errors = [
+	
 		!type &&
 		'The pull request title must match the pattern of "<type>[!]: <subject>" which is a reduced set of https://www.conventionalcommits.org/en/v1.0.0/',
 
@@ -32,12 +33,18 @@ export function checkConventionalMessage(message: string, { debug }: Pick<Consol
 
 		typeof subject === 'string' && /^[a-z]/.test(subject.trim()) === false &&
 		'The subject must start with a lower case latin alphabet.',
+
+		typeof subject === 'string' && /[\s\.]+$/.test(subject) && /\.{3}$/.test(subject.trim()) === false &&
+		'The subject must not end with a period or a space.',
+
 	].filter((error): error is string => typeof error === 'string')
 
 	return {
 		type,
 		breaking: !!breaking,
-		subject: typeof subject === 'string' ? subject.trim() : subject,
+		subject: typeof subject === 'string'
+			? subject.trim().replace(/[\s\.]+$/, '') + (/\.{3}$/.test(subject.trim()) ? '...' : '')
+			: message,
 		errors
 	}
 }

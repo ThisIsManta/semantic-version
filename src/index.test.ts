@@ -76,3 +76,19 @@ it('returns the error, given the first word in non-lower-case for the subject', 
 		]
 	})
 })
+
+it('returns the error, given a period after the subject', () => {
+	expect(checkConventionalMessage('chore: xxx.', { debug })).toMatchObject({
+		subject: 'xxx',
+		errors: [
+			'The subject must not end with a period or a space.'
+		]
+	})
+
+	expect(checkConventionalMessage('chore: xxx ...', { debug })).toEqual({
+		type: 'chore',
+		breaking: false,
+		subject: 'xxx...',
+		errors: []
+	})
+})
