@@ -7,13 +7,11 @@ import { debug } from './debug'
 main()
 
 async function main() {
-	debug('cwd', process.cwd())
-	debug('ver', await run('npm pkg get version'))
-	const lastVersion = semver.valid(await run('npm pkg get version'))
+	const lastVersion = semver.valid(JSON.parse(await run('npm pkg get version')))
 	debug('lastVersion »', JSON.stringify(lastVersion))
 
 	if (!lastVersion) {
-		throw new Error('Expect to have a last version on Git tag or package.json `version` field.')
+		throw new Error('Expect to have a valid "version" field in package.json.')
 	}
 
 	const commits = (
