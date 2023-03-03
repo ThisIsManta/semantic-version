@@ -21,20 +21,22 @@
 		"build": "rm -rf lib && tsc",
 		"preversion": "npm run test && npm run build",
 		"version": "npm publish --access public",
-		"postversion": "git push --tags origin master",
+		"postversion": "git push --follow-tags origin master",
 		"postinstall": "node ./lib/install-git-hooks.js"
 	},
 	"devDependencies": {
 		"@types/jest": "^29.4.0",
 		"@types/node": "^16.0.0",
+		"@types/semver": "^7.3.13",
 		"jest": "^29.4.3",
 		"ts-jest": "^29.0.5",
-		"typescript": "^4.9.5",
-		"yn": "^5.0.0"
+		"typescript": "^4.9.5"
 	},
 	"dependencies": {
+		"@actions/github": "^5.1.1",
 		"execa": "npm:@esm2cjs/execa@^6.1.1-cjs.1",
-		"husky": "^8.0.3"
+		"husky": "^8.0.3",
+		"semver": "^7.3.8"
 	},
 	"jest": {
 		"preset": "ts-jest",

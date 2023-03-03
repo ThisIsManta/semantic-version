@@ -37,11 +37,6 @@ async function main() {
 		'npx lint-commit-message ${1}'
 	)
 
-	await upsert(
-		fp.join(huskyDirectoryPath, 'post-commit'),
-		'npx auto-npm-version'
-	)
-
 	console.log('Done adding Git hooks.')
 }
 
