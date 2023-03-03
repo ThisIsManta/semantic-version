@@ -14,7 +14,7 @@ async function main() {
 	debug('lastVersion »', JSON.stringify(lastVersion))
 
 	if (!lastVersion) {
-		throw new Error('Expect to have a valid "version" field in package.json.')
+		throw new Error('Could not find last version.')
 	}
 
 	const commits = (await run(`git log v${lastVersion}..HEAD --format=%H%s`))
@@ -68,7 +68,7 @@ async function main() {
 	console.log(`Pushed Git tags`)
 
 	if (nextVersion && process.env.GITHUB_TOKEN) {
-		const commitGroups: Record<'BREAKING CHANGES' | 'Features' | 'Bug Fixes' | 'Others', typeof commits> = {
+		const groups: Record<'BREAKING CHANGES' | 'Features' | 'Bug Fixes' | 'Others', typeof commits> = {
 			'BREAKING CHANGES': [],
 			'Features': [],
 			'Bug Fixes': [],
@@ -77,17 +77,17 @@ async function main() {
 
 		for (const commit of commits) {
 			if (commit.breaking) {
-				commitGroups['BREAKING CHANGES'].push(commit)
+				groups['BREAKING CHANGES'].push(commit)
 			} else if (commit.type === 'feat') {
-				commitGroups['Features'].push(commit)
+				groups['Features'].push(commit)
 			} else if (commit.type === 'bug') {
-				commitGroups['Bug Fixes'].push(commit)
+				groups['Bug Fixes'].push(commit)
 			} else {
-				commitGroups['Others'].push(commit)
+				groups['Others'].push(commit)
 			}
 		}
 
-		const releaseNote = Object.entries(commitGroups)
+		const releaseNote = Object.entries(groups)
 			.filter(([title, commits]) => commits.length > 0)
 			.map(([title, commits]) =>
 				`### ${title}\n\n` +
@@ -100,13 +100,12 @@ async function main() {
 
 		const octokit = github.getOctokit(process.env.GITHUB_TOKEN)
 
-		github.context.payload.ref
-
 		// See https://octokit.github.io/rest.js/v19#repos-create-release
 		const releaseRespond = await octokit.rest.repos.createRelease({
 			...github.context.repo,
-			tag_name: nextVersion,
+			tag_name: 'v' + nextVersion,
 			body: releaseNote,
+			make_latest: true, // TODO: compare with the latest release
 		})
 		debug('releaseRespond »', JSON.stringify(releaseRespond, null, 2))
 		console.log('Created a new release on GitHub')
