@@ -60,14 +60,14 @@ async function main() {
 		return
 	}
 
-	const nextVersion = await run(`npm version --json --no-commit-hooks ${releaseType}`)
-	debug('nextVersion »', nextVersion)
-	console.log(`Created version ${releaseType}`)
+	const nextVersion = semver.valid(await run(`npm version --json --no-commit-hooks ${releaseType}`))
+	debug('nextVersion »', JSON.stringify(nextVersion))
+	console.log(`Created tag ${releaseType}`)
 
 	await run(`git push --follow-tags origin`)
 	console.log(`Pushed Git tags`)
 
-	if (semver.valid(nextVersion) && process.env.GITHUB_TOKEN) {
+	if (nextVersion && process.env.GITHUB_TOKEN) {
 		const commitGroups: Record<'BREAKING CHANGES' | 'Features' | 'Bug Fixes' | 'Others', typeof commits> = {
 			'BREAKING CHANGES': [],
 			'Features': [],
