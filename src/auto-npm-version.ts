@@ -26,7 +26,7 @@ async function main() {
 		}))
 		.filter(({ message }) => semver.valid(message) === null)
 		.map(({ hash, message }) => {
-			const { type, breaking, subject } = checkConventionalMessage(message, { debug })
+			const { type, breaking, subject } = checkConventionalMessage(message, { debug: () => { } })
 
 			return {
 				hash,
@@ -64,7 +64,7 @@ async function main() {
 	debug('nextVersion »', nextVersion)
 	console.log(`Created version ${releaseType}`)
 
-	await run(`git push --follow-tags origin master`)
+	await run(`git push --follow-tags origin`)
 	console.log(`Pushed Git tags`)
 
 	if (semver.valid(nextVersion) && process.env.GITHUB_TOKEN) {
@@ -98,7 +98,9 @@ async function main() {
 			.join('\n\n')
 		debug('releaseNote »', releaseNote)
 
-		const octokit = github.getOctokit(process.env.GITHUB_TOKEN!)
+		const octokit = github.getOctokit(process.env.GITHUB_TOKEN)
+
+		github.context.payload.ref
 
 		// See https://octokit.github.io/rest.js/v19#repos-create-release
 		const releaseRespond = await octokit.rest.repos.createRelease({

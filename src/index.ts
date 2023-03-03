@@ -9,7 +9,7 @@ export function checkConventionalMessage(message: string, { debug }: Pick<Consol
 	debug('type »', type)
 	debug('scope »', scope)
 	debug('breaking »', breaking)
-	debug('subject »', subject)
+	debug('subject »', subject?.trim())
 
 	const errors = [
 	
