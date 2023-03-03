@@ -7,7 +7,10 @@ import { debug } from './debug'
 main()
 
 async function main() {
-	const lastVersion = semver.valid(JSON.parse(await run('npm pkg get version')))
+	const lastVersion = semver.valid(
+		await run('git describe --tags --abbrev=0').catch(() => '') ||
+		JSON.parse(await run('npm pkg get version'))
+	)
 	debug('lastVersion »', JSON.stringify(lastVersion))
 
 	if (!lastVersion) {
@@ -34,7 +37,6 @@ async function main() {
 		})
 	console.log(`Found ${commits.length} commits since v${lastVersion}`)
 	debug('commits »', JSON.stringify(commits, null, 2))
-	return
 
 	const releaseType = commits.reduce((releaseType: 'major' | 'minor' | 'patch' | null, { type, breaking }) => {
 		if (releaseType === 'major' || breaking) {
