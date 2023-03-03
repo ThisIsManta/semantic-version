@@ -27,32 +27,17 @@ async function main() {
 		.filter(({ message }) => semver.valid(message) === null)
 		.map(({ hash, message }) => {
 			const { type, breaking, subject } = checkConventionalMessage(message, { debug: () => { } })
-
-			return {
-				hash,
-				type,
-				breaking,
-				subject,
-			}
+			return { hash, type, breaking, subject }
 		})
-	console.log(`Found ${commits.length} commits since v${lastVersion}`)
+	console.log(`Found ${commits.length} qualified commits since v${lastVersion}`)
 	debug('commits »', JSON.stringify(commits, null, 2))
 
-	const releaseType = commits.reduce((releaseType: 'major' | 'minor' | 'patch' | null, { type, breaking }) => {
-		if (releaseType === 'major' || breaking) {
-			return 'major'
-		}
-
-		if (releaseType === 'minor' || type === 'feat') {
-			return releaseType
-		}
-
-		if (type === 'fix' || type === 'refactor') {
-			return 'patch'
-		}
-
-		return releaseType
-	}, null)
+	const releaseType = (
+		commits.find(({ breaking }) => breaking) && 'major' ||
+		commits.find(({ type }) => type === 'feat') && 'minor' ||
+		commits.find(({ type }) => type === 'fix' || type === 'refactor') && 'patch' ||
+		null
+	)
 	debug('releaseType »', JSON.stringify(releaseType))
 
 	if (!releaseType) {
@@ -62,10 +47,10 @@ async function main() {
 
 	const nextVersion = semver.valid(await run(`npm version --json --no-commit-hooks ${releaseType}`))
 	debug('nextVersion »', JSON.stringify(nextVersion))
-	console.log(`Created tag ${releaseType}`)
+	console.log(`Created tag v${nextVersion}`)
 
 	await run(`git push --follow-tags origin`)
-	console.log(`Pushed Git tags`)
+	console.log(`Pushed Git refs`)
 
 	if (nextVersion && process.env.GITHUB_TOKEN) {
 		const groups: Record<'BREAKING CHANGES' | 'Features' | 'Bug Fixes' | 'Others', typeof commits> = {
