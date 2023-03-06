@@ -32,20 +32,20 @@ async function main() {
 	debug('releaseType »', JSON.stringify(releaseType))
 
 	if (!releaseType) {
-		console.log('Exited without releasing a new version')
+		console.log('Done without releasing a new version')
 		return
 	}
 
-	const nextVersion = semver.clean(await run(`npm version --json --git-tag-version ${releaseType}`))
+	await run(`npm version --git-tag-version ${releaseType}`)
+	await run(`git push --follow-tags origin`)
+
+	const nextVersion = await getLastVersion()
 	debug('nextVersion »', JSON.stringify(nextVersion))
 	console.log(`Created tag v${nextVersion}`)
 
 	if (!nextVersion) {
 		throw new Error(`Expected "${nextVersion}" returned from "npm version" to be a valid semantic version.`)
 	}
-
-	await run(`git push --follow-tags origin`)
-	console.log(`Pushed Git refs`)
 
 	const releaseNote = getReleaseNote(commits)
 	debug('releaseNote »', releaseNote)
@@ -61,8 +61,7 @@ async function main() {
 	})
 	debug('releaseRespond »', JSON.stringify(releaseRespond, null, 2))
 	if (releaseRespond.status >= 200 && releaseRespond.status < 300) {
-		console.log('Created a new release on GitHub')
-		console.log(releaseRespond.data.url)
+		console.log('Created', releaseRespond.data.url)
 	}
 }
 
