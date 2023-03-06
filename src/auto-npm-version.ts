@@ -13,9 +13,17 @@ async function main() {
 	}
 
 	// Set up Git commit author for further use in "npm version" and "git push" command
-	await run(`git config user.name semantic-version`)
-	await run(`git config user.email semantic-version@example.com`)
-	await run(`git config user.password ${process.env.GITHUB_TOKEN}`)
+	// See https://github.com/actions/checkout#push-a-commit-using-the-built-in-token
+	if (!(await run(`git config user.name`).catch(() => ''))) {
+		await run(`git config user.name ${github.context.payload.pusher?.name || github.context.actor}`)
+		await run(`git config user.email ${github.context.payload.pusher?.email || 'github-actions@github.com'}`)
+	}
+
+	const remote = await run(`git remote`) || 'origin'
+
+	// Check if the given GITHUB_TOKEN has the permission to push to the repository
+	// See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#configuring-the-default-github_token-permissions
+	await run(`git push --dry-run ${remote}`)
 
 	const lastVersion = await getLastVersion()
 	debug('lastVersion »', JSON.stringify(lastVersion))
@@ -37,7 +45,7 @@ async function main() {
 	}
 
 	await run(`npm version --git-tag-version ${releaseType}`)
-	await run(`git push --follow-tags origin`)
+	await run(`git push --follow-tags ${remote}`)
 
 	const nextVersion = await getLastVersion()
 	debug('nextVersion »', JSON.stringify(nextVersion))
