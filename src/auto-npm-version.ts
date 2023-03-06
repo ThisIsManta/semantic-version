@@ -40,7 +40,7 @@ async function main() {
 	debug('releaseType »', JSON.stringify(releaseType))
 
 	if (!releaseType) {
-		console.log('Done without releasing a new version')
+		console.log('Done without a new version')
 		return
 	}
 
@@ -65,11 +65,11 @@ async function main() {
 		...github.context.repo,
 		tag_name: 'v' + nextVersion,
 		body: releaseNote,
-		make_latest: true, // TODO: compare with the latest release
+		make_latest: 'true', // TODO: compare with the latest release
 	})
 	debug('releaseRespond »', JSON.stringify(releaseRespond, null, 2))
 	if (releaseRespond.status >= 200 && releaseRespond.status < 300) {
-		console.log('Created', releaseRespond.data.url)
+		console.log('Done with', releaseRespond.data.url)
 	}
 }
 
