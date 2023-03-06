@@ -30,9 +30,9 @@ it('returns the error, given an invalid pattern', () => {
 
 it('returns the error, given an unknown type', () => {
 	expect(checkConventionalMessage('unknown: xxx', { debug })).toMatchObject({
-		type: 'unknown',
+		type: undefined,
 		errors: [
-			'The type in a pull request title must be one of \"feat\", \"fix\", \"test\", \"refactor\", \"chore\".'
+			'The type in a pull request title must be one of "feat", "fix", "build", "chore".'
 		]
 	})
 })

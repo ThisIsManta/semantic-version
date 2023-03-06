@@ -1,6 +1,8 @@
 const titlePattern = /^(?<type>\w+)(?<scope>\(.*?\))?(?<breaking>\!)?:(?<subject>.+)/
 
-export const allowedTypes = ['feat', 'fix', 'test', 'refactor', 'chore']
+export const allowedTypes = ['feat', 'fix', 'build', 'chore'] as const
+
+export type SemanticType = typeof allowedTypes[number]
 
 export function checkConventionalMessage(message: string, { debug }: Pick<Console, 'debug'>) {
 	const pattern: { [key: string]: string | undefined } = (message.match(titlePattern)?.groups || {})
@@ -12,11 +14,10 @@ export function checkConventionalMessage(message: string, { debug }: Pick<Consol
 	debug('subject »', subject?.trim())
 
 	const errors = [
-	
 		!type &&
 		'The pull request title must match the pattern of "<type>[!]: <subject>" which is a reduced set of https://www.conventionalcommits.org/en/v1.0.0/',
 
-		typeof type === 'string' && allowedTypes.includes(type.toLowerCase()) === false &&
+		typeof type === 'string' && allowedTypes.includes(type.toLowerCase() as any) === false &&
 		'The type in a pull request title must be one of ' + allowedTypes.map(name => '"' + name + '"').join(', ') + '.',
 
 		typeof type === 'string' && /^[a-z]+$/.test(type) === false &&
@@ -36,11 +37,10 @@ export function checkConventionalMessage(message: string, { debug }: Pick<Consol
 
 		typeof subject === 'string' && /[\s\.]+$/.test(subject) && /\.{3}$/.test(subject.trim()) === false &&
 		'The subject must not end with a period or a space.',
-
 	].filter((error): error is string => typeof error === 'string')
 
 	return {
-		type,
+		type: allowedTypes.includes(type as any) ? type as SemanticType : undefined,
 		breaking: !!breaking,
 		subject: typeof subject === 'string'
 			? subject.trim().replace(/[\s\.]+$/, '') + (/\.{3}$/.test(subject.trim()) ? '...' : '')
