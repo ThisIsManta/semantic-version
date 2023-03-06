@@ -33,7 +33,7 @@ async function main() {
 	}
 
 	const commits = getCommits(await getGitHistory(lastVersion))
-	console.log(`Found ${commits.length} qualified commits since v${lastVersion}`)
+	console.log(`Found ${commits.length} qualified commit${commits.length === 1 ? '' : 's'} since v${lastVersion}`)
 	debug('commits »', JSON.stringify(commits, null, 2))
 
 	const releaseType = getReleaseType(commits)
@@ -61,16 +61,14 @@ async function main() {
 	const octokit = github.getOctokit(process.env.GITHUB_TOKEN)
 
 	// See https://octokit.github.io/rest.js/v19#repos-create-release
-	const releaseRespond = await octokit.rest.repos.createRelease({
+	const releaseCreationRespond = await octokit.rest.repos.createRelease({
 		...github.context.repo,
 		tag_name: 'v' + nextVersion,
 		body: releaseNote,
-		make_latest: 'true', // TODO: compare with the latest release
+		make_latest: 'legacy',
 	})
-	debug('releaseRespond »', JSON.stringify(releaseRespond, null, 2))
-	if (releaseRespond.status >= 200 && releaseRespond.status < 300) {
-		console.log('Done with', releaseRespond.data.url)
-	}
+	debug('releaseCreationRespond »', JSON.stringify(releaseCreationRespond, null, 2))
+	console.log('Done with a new release at', releaseCreationRespond.data.html_url)
 }
 
 async function run(command: string) {
