@@ -3,6 +3,10 @@
 	"version": "5.0.2",
 	"author": "Anantachai Saothong <thisismanta@gmail.com>",
 	"license": "ISC",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ThisIsManta/semantic-version.git"
+	},
 	"engines": {
 		"node": ">=16.0.0"
 	},
