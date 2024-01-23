@@ -1,7 +1,7 @@
 import semver from 'semver'
-import { execaCommand } from 'execa'
 import * as github from '@actions/github'
 import { checkConventionalMessage } from './index'
+import { run } from './run'
 import { debug } from './debug'
 
 main()
@@ -69,13 +69,6 @@ async function main() {
 	})
 	debug('releaseCreationRespond »', JSON.stringify(releaseCreationRespond, null, 2))
 	console.log('Done with a new release at', releaseCreationRespond.data.html_url)
-}
-
-async function run(command: string) {
-	debug(command)
-	const { stdout } = await execaCommand(command)
-	debug(stdout)
-	return stdout
 }
 
 async function getLastVersion() {

@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises'
 import * as fp from 'path'
-import { execaCommand } from 'execa'
+import { run } from './run'
 import { debug } from './debug'
 
 main()
@@ -8,81 +8,42 @@ main()
 const packageName = require('../package.json').name
 
 async function main() {
-	const currentDirectoryPath = process.cwd()
-	debug('currentDirectoryPath »', currentDirectoryPath)
+	const rootDirectoryPath = await run('git rev-parse --show-toplevel')
+	debug('rootDirectoryPath »', rootDirectoryPath)
 
-	const gitDirectoryPath = await findGitDirectoryPath(currentDirectoryPath)
-	debug('gitDirectoryPath »', gitDirectoryPath)
-
-	if (!gitDirectoryPath) {
+	if (!rootDirectoryPath) {
 		throw new Error('Could not find a Git directory.')
 	}
 
-	const packageJSON = JSON.parse(await fs.readFile(fp.join(gitDirectoryPath, 'package.json'), 'utf-8'))
+	const packageJSON = JSON.parse(await fs.readFile(fp.join(rootDirectoryPath, 'package.json'), 'utf-8'))
 	if (packageJSON.name === packageName) {
 		console.warn('Skip installing Git hooks as it is supposed to be done on a consumer repository.')
 		return
 	}
 
-	console.log('Installing Husky')
-	await execaCommand('npx husky install', { cwd: gitDirectoryPath })
+	const hookDirectoryPath = await run('git config --get core.hooksPath').catch(() => '') || '.git/hooks'
+	const hookFilePath = fp.join(rootDirectoryPath, hookDirectoryPath, 'commit-msg')
+	debug('hookFilePath »', hookFilePath)
 
-	const huskyDirectoryPath = fp.resolve(gitDirectoryPath, '.husky')
-	debug('huskyDirectoryPath »', huskyDirectoryPath)
-
-	await fs.access(huskyDirectoryPath)
-
-	await upsert(
-		fp.join(huskyDirectoryPath, 'commit-msg'),
-		'npx lint-commit-message ${1}'
-	)
-
-	console.log('Done adding Git hooks.')
-}
-
-async function findGitDirectoryPath(path: string) {
-	const pathList = path.split(fp.sep)
-	while (pathList.length > 1) {
-		const testPath = fp.join(pathList.join(fp.sep), '.git')
-
-		try {
-			await fs.access(testPath)
-			const stat = await fs.lstat(testPath)
-			if (stat.isDirectory()) {
-				return pathList.join(fp.sep)
-			}
-
-		} catch {
-			// Do nothing
-		}
-
-		pathList.pop()
-	}
-
-	return null
-}
-
-async function upsert(filePath: string, text: string) {
 	try {
-		await fs.access(filePath)
-		console.log('Found', filePath)
-	} catch (error) {
-		await fs.writeFile(
-			filePath,
-			'#!/usr/bin/env sh' + '\n' +
-			'. "$(dirname -- "$0")/_/husky.sh"' + '\n',
-			'utf-8'
-		)
-		console.log('Created', filePath)
+		await fs.access(hookFilePath, fs.constants.R_OK | fs.constants.W_OK)
+		debug('Found', hookFilePath)
+	} catch {
+		await fs.mkdir(fp.dirname(hookFilePath), { recursive: true })
+		await fs.writeFile(hookFilePath, '#!/bin/sh\n', 'utf-8')
+		debug('Created', hookFilePath)
 	}
 
-	const fileText = await fs.readFile(filePath, 'utf-8')
-	const lines = fileText.trim().split('\n')
-	const index = lines
-		.findIndex(line => line.trim().includes(text))
-
-	if (index === -1) {
-		await fs.appendFile(filePath, '\n' + text + '\n', 'utf-8')
-		console.log(`Added "${text}" to ${filePath}`)
+	const hookFileText = await fs.readFile(hookFilePath, 'utf-8')
+	if (/(^|\s|\/)lint-commit-message(\s|$)/m.test(hookFileText)) {
+		console.log('Skipped adding commit-msg Git hook.')
+	} else {
+		await fs.appendFile(hookFilePath, [
+			'',
+			'dir="$(git rev-parse --show-toplevel)"',
+			'"$dir/node_modules/.bin/lint-commit-message" "$@"',
+			'',
+		].join('\n'), 'utf-8')
+		console.log('Done adding commit-msg Git hook.')
 	}
 }
