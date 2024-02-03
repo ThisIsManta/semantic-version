@@ -72,10 +72,14 @@ async function main() {
 }
 
 async function getLastVersion() {
-	return (
-		semver.valid(await run('git describe --tags --abbrev=0').catch(() => '')) ||
-		semver.valid(JSON.parse(await run('npm pkg get version')))
-	)
+	const versionFromGit = await run('git describe --tags --abbrev=0').catch(() => null)
+	const versionFromPackageJSON = JSON.parse(await run('npm pkg get version'))
+	const versions = [versionFromGit, versionFromPackageJSON]
+		.map(version => semver.valid(version))
+		.filter((version): version is string => !!version)
+
+	// Choose the higher version
+	return semver.sort(versions).pop()
 }
 
 async function getGitHistory(version: string) {
@@ -99,13 +103,20 @@ function getCommits(gitLog: string) {
 		})
 }
 
-function getReleaseType(commits: ReturnType<typeof getCommits>) {
-	return (
-		commits.find(({ breaking }) => breaking) && 'major' ||
-		commits.find(({ type }) => type === 'feat') && 'minor' ||
-		commits.find(({ type }) => type === 'fix' || type === 'build') && 'patch' ||
-		null
-	)
+function getReleaseType(commits: ReturnType<typeof getCommits>): string | null {
+	if (commits.find(({ breaking }) => breaking)) {
+		return 'major'
+	}
+
+	if (commits.find(({ type }) => type === 'feat')) {
+		return 'minor'
+	}
+
+	if (commits.find(({ type }) => type === 'fix' || type === 'build')) {
+		return 'patch'
+	}
+
+	return null
 }
 
 function getReleaseNote(commits: ReturnType<typeof getCommits>) {
