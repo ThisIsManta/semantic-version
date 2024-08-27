@@ -4,14 +4,10 @@ export const allowedTypes = ['feat', 'fix', 'build', 'chore'] as const
 
 export type SemanticType = typeof allowedTypes[number]
 
-export function checkConventionalMessage(message: string, { debug }: Pick<Console, 'debug'>) {
+export function checkConventionalMessage(message: string) {
 	const pattern: { [key: string]: string | undefined } = (message.match(titlePattern)?.groups || {})
 
 	const { type, scope, breaking, subject } = pattern
-	debug('type »', type)
-	debug('scope »', scope)
-	debug('breaking »', breaking)
-	debug('subject »', subject?.trim())
 
 	const errors = [
 		!type &&
