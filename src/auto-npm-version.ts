@@ -1,5 +1,4 @@
 import isValidVersion from 'semver/functions/valid'
-import sortVersions from 'semver/functions/sort'
 import * as github from '@actions/github'
 import { checkConventionalMessage } from './index'
 import { run } from './run'
@@ -41,7 +40,7 @@ export default async function main() {
 	}
 
 	console.log('Getting the commit history since the current version...')
-	const commits = getCommits(await getGitHistory(currentVersion))
+	const commits = await getGitHistory(currentVersion)
 	if (commits.length === 0) {
 		console.log('  Found 0 commits.')
 	} else {
@@ -90,14 +89,12 @@ export default async function main() {
 }
 
 async function getCurrentPackageVersion() {
-	const versionFromGit = await run('git describe --tags --abbrev=0').catch(() => null)
-	const versionFromPackageJSON = JSON.parse(await run('npm pkg get version'))
-	const versions = [versionFromGit, versionFromPackageJSON]
-		.map(version => isValidVersion(version))
-		.filter((version): version is string => !!version)
-
-	// Choose the higher version
-	return sortVersions(versions).pop()
+	const version = JSON.parse(await run('npm pkg get version'))
+	if (typeof version === 'string' && isValidVersion(version)) {
+		return version
+	} else {
+		throw new Error('Expected a valid version field in package.json.')
+	}
 }
 
 interface GitCommit {
@@ -107,10 +104,12 @@ interface GitCommit {
 	subject: string
 }
 
-async function getGitHistory(version: string) {
-	const tagFound = !!(await run(`git tag --list v${version}`))
-
-	return await run(`git --no-pager log ${tagFound ? `v${version}..HEAD` : ''} --format=%H%s`)
+async function getGitHistory(version: string): Promise<Array<GitCommit>> {
+	const tag = (
+		await run(`git tag --list v${version}`) ||
+		await run('git describe --tags --abbrev=0')
+	)
+	return getCommits(await run(`git --no-pager log ${tag ? tag + '..HEAD' : ''} --format=%H%s`))
 }
 
 function getCommits(gitLogs: string) {
