@@ -4,9 +4,7 @@ import { checkConventionalMessage } from './index'
 import { run } from './run'
 import { debug } from './debug'
 
-main()
-
-async function main() {
+export default async function main() {
 	debug('process.env.GITHUB_TOKEN »', process.env.GITHUB_TOKEN)
 	if (!process.env.GITHUB_TOKEN) {
 		throw new Error('Expected "GITHUB_TOKEN" env to be provided.')
@@ -103,7 +101,7 @@ function getCommits(gitLog: string) {
 		})
 }
 
-function getReleaseType(commits: ReturnType<typeof getCommits>): string | null {
+export function getReleaseType(commits: ReturnType<typeof getCommits>): string | null {
 	if (commits.find(({ breaking }) => breaking)) {
 		return 'major'
 	}

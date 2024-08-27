@@ -1,8 +1,9 @@
 {
 	"pre-commit": {
+		"parallel": true,
 		"commands": {
-			"lint": {
-				"run": "npx tsc --noEmit"
+			"build": {
+				"run": "npm run build"
 			},
 			"test": {
 				"run": "npm test --ci --silent"
@@ -12,7 +13,7 @@
 	"commit-msg": {
 		"commands": {
 			"lint": {
-				"run": "npx ts-node ./src/lint-commit-message {1}"
+				"run": "node ./bin/lint-commit-message {1}"
 			}
 		}
 	}
