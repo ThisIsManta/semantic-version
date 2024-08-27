@@ -1,18 +1,18 @@
 import * as cp from 'child_process'
-import debug from './debug'
 
 export function run(command: string): Promise<string> {
-	debug(command)
-
 	return new Promise<string>((resolve, reject) => {
 		cp.exec(command, (error, stdout, stderr) => {
-			const output = (stdout + stderr).trim()
-			debug(output)
-
 			if (error) {
+				// See https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/workflow-commands-for-github-actions#grouping-log-lines
+				console.log('::group::' + command)
+				console.log(stdout)
+				console.error(stderr)
+				console.log('::endgroup::')
+
 				reject(error)
 			} else {
-				resolve(output)
+				resolve((stdout + stderr).trim())
 			}
 		})
 	})
