@@ -5,27 +5,27 @@
 	"license": "ISC",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/ThisIsManta/semantic-version.git"
+		"url": "git+https://github.com/ThisIsManta/semantic-version.git"
 	},
 	"engines": {
 		"node": ">=20.0.0"
 	},
-	"packageManager": "npm@10.9.4",
-	"main": "./lib/index.js",
-	"types": "./lib/index.d.ts",
+	"packageManager": "npm@11.6.2",
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
 	"bin": {
-		"lint-commit-message": "./bin/lint-commit-message",
-		"auto-npm-version": "./bin/auto-npm-version"
+		"lint-commit-message": "bin/lint-commit-message",
+		"auto-npm-version": "bin/auto-npm-version"
 	},
 	"files": [
-		"./lib",
-		"./bin"
+		"lib",
+		"bin"
 	],
 	"scripts": {
 		"test": "vitest --no-watch",
 		"build": "rm -rf lib && tsc",
 		"preversion": "npm run build",
-		"version": "npm publish --access public"
+		"version": "npm publish --provenance --access public"
 	},
 	"devDependencies": {
 		"@types/node": "^20.19.30",
