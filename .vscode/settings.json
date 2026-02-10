@@ -1,5 +1,5 @@
 {
-	"files.exclude": {
+	"search.exclude": {
 		"lib": true
 	}
 }

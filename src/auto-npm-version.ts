@@ -1,5 +1,5 @@
 import isValidVersion from 'semver/functions/valid'
-import * as github from '@actions/github'
+import { context, getOctokit } from '@actions/github'
 import { checkConventionalMessage } from './index'
 import { run } from './run'
 
@@ -9,11 +9,11 @@ export default async function main() {
 	if (!existingGitUserName) {
 		console.log('Setting Git commit author for further use in `npm version` and `git push` command...')
 
-		const name = github.context.payload.pusher?.name || github.context.actor
+		const name = context.payload.pusher?.name || context.actor
 		console.log('  user.name =', name)
 		await run(`git config user.name ${name}`)
 
-		const email = github.context.payload.pusher?.email || 'github-actions@github.com'
+		const email = context.payload.pusher?.email || 'github-actions@github.com'
 		console.log('  user.email =', name)
 		await run(`git config user.email ${email}`)
 	}
@@ -75,9 +75,9 @@ export default async function main() {
 	const releaseNote = getReleaseNote(commits)
 
 	// See https://octokit.github.io/rest.js/v19#repos-create-release
-	const octokit = github.getOctokit(process.env.GITHUB_TOKEN)
+	const octokit = getOctokit(process.env.GITHUB_TOKEN)
 	const releaseCreationRespond = await octokit.rest.repos.createRelease({
-		...github.context.repo,
+		...context.repo,
 		tag_name: 'v' + latestVersion,
 		body: releaseNote,
 		make_latest: 'legacy',

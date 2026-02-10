@@ -8,7 +8,7 @@
 		"url": "git+https://github.com/ThisIsManta/semantic-version.git"
 	},
 	"engines": {
-		"node": ">=20.0.0"
+		"node": ">=22.0.0"
 	},
 	"packageManager": "npm@11.6.2",
 	"main": "lib/index.js",
@@ -23,20 +23,19 @@
 	],
 	"scripts": {
 		"test": "vitest --no-watch",
-		"build": "rm -rf lib && tsc",
+		"build": "rm -rf lib && find src -name '*.ts' ! -name '*.test.ts' | xargs esbuild --bundle --outdir=lib --platform=node --target=node22 --format=cjs --minify-whitespace",
 		"preversion": "npm run build",
 		"version": "npm publish --provenance --access public"
 	},
 	"devDependencies": {
-		"@types/node": "^20.19.30",
+		"@actions/github": "^9.0.0",
+		"@types/node": "~22.19.10",
 		"@types/semver": "^7.7.1",
-		"lefthook": "^2.0.15",
+		"esbuild": "^0.27.3",
+		"lefthook": "^2.1.0",
+		"semver": "^7.7.4",
 		"typescript": "^5.9.3",
 		"vite": "^7.3.1",
-		"vitest": "^4.0.17"
-	},
-	"dependencies": {
-		"@actions/github": "^7.0.0",
-		"semver": "^7.7.3"
+		"vitest": "^4.0.18"
 	}
 }
