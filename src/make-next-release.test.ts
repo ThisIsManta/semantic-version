@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 
-import { getReleaseType } from './auto-npm-version'
+import { getReleaseType } from './make-next-release'
 
 describe(getReleaseType, () => {
 	it('returns major, given at least one breaking', () => {

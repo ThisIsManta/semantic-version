@@ -4,6 +4,7 @@
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"module": "CommonJS",
+		"noEmit": true,
 		"noUnusedLocals": true,
 		"outDir": "../lib",
 		"resolveJsonModule": true,

@@ -1,0 +1,2 @@
+#!/usr/bin/env node
+require('../lib/make-next-release').default()

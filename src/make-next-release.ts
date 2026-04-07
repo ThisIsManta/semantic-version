@@ -1,15 +1,17 @@
+import * as process from 'node:process'
+
 import { context, getOctokit } from '@actions/github'
 import isValidVersion from 'semver/functions/valid'
 
 import { checkConventionalMessage } from './index'
-import { run } from './run'
+import { run, npm } from './run'
 
-export default async function main() {
+export default async function () {
 	// See https://github.com/actions/checkout#push-a-commit-using-the-built-in-token
 	const existingGitUserName = await run(`git config user.name`).catch(() => '')
 	if (!existingGitUserName) {
 		console.log(
-			'Setting Git commit author for further use in `npm version` and `git push` command...'
+			'Setting Git commit author for further use in `' + npm + ' version` and `git push` command...'
 		)
 
 		const name = context.payload.pusher?.name || context.actor
@@ -66,8 +68,8 @@ export default async function main() {
 		return
 	}
 
-	console.log('Running `npm version` command and its pre-post scripts...')
-	await run(`npm version ${releaseType} --git-tag-version --no-commit-hooks`)
+	console.log('Running `' + npm + ' version` command and its pre-post scripts...')
+	await run(`${npm} version ${releaseType} --git-tag-version --no-commit-hooks`)
 	console.log('  OK')
 
 	console.log('Pushing the new version to the remote repository...')
@@ -96,7 +98,7 @@ export default async function main() {
 }
 
 async function getCurrentPackageVersion() {
-	const version = JSON.parse(await run('npm pkg get version'))
+	const version = JSON.parse(await run(`${npm} pkg get version`))
 	if (typeof version === 'string' && isValidVersion(version)) {
 		return version
 	} else {

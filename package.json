@@ -8,8 +8,8 @@
 		"url": "git+https://github.com/ThisIsManta/semantic-version.git"
 	},
 	"bin": {
-		"auto-npm-version": "bin/auto-npm-version",
-		"lint-commit-message": "bin/lint-commit-message"
+		"lint-commit-message": "bin/lint-commit-message",
+		"make-next-release": "bin/make-next-release"
 	},
 	"files": [
 		"lib",
@@ -18,7 +18,7 @@
 	"main": "lib/index.js",
 	"types": "lib/index.d.ts",
 	"scripts": {
-		"test": "vitest --no-watch",
+		"test": "tsc && vitest --no-watch",
 		"build": "rm -rf lib && find src -name '*.ts' ! -name '*.test.ts' | xargs esbuild --bundle --outdir=lib --platform=node --target=node22 --format=cjs --minify-whitespace",
 		"preversion": "npm run build",
 		"version": "npm publish --provenance --access public"
@@ -35,14 +35,18 @@
 		"vitest": "^4.1.2"
 	},
 	"devEngines": {
+		"packageManager": {
+			"name": "npm",
+			"version": "^11.9.0",
+			"onFail": "error"
+		},
 		"runtime": {
 			"name": "node",
 			"version": "^24.14.0",
-			"onFail": "download"
+			"onFail": "warn"
 		}
 	},
 	"engines": {
 		"node": ">=22.0.0"
-	},
-	"packageManager": "npm@11.9.0"
+	}
 }

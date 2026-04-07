@@ -1,4 +1,5 @@
-import * as cp from 'child_process'
+import * as cp from 'node:child_process'
+import * as fs from 'node:fs'
 
 export function run(command: string): Promise<string> {
 	return new Promise<string>((resolve, reject) => {
@@ -19,3 +20,10 @@ export function run(command: string): Promise<string> {
 		})
 	})
 }
+
+const packageJSON = JSON.parse(fs.readFileSync('./package.json', { encoding: 'utf-8' }))
+
+export const npm: string =
+	packageJSON?.packageManager?.replace(/@.*$/, '') ??
+	packageJSON?.devEngines?.packageManager?.name ??
+	'npm'
