@@ -1,33 +1,22 @@
 {
 	"name": "@thisismanta/semantic-version",
 	"version": "10.0.0",
-	"author": "Anantachai Saothong <thisismanta@gmail.com>",
 	"license": "ISC",
+	"author": "Anantachai Saothong <thisismanta@gmail.com>",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/ThisIsManta/semantic-version.git"
 	},
-	"packageManager": "npm@11.9.0",
-	"devEngines": {
-		"runtime": {
-			"name": "node",
-			"version": "^24.14.0",
-			"onFail": "download"
-		}
-	},
-	"engines": {
-		"node": ">=22.0.0"
-	},
-	"main": "lib/index.js",
-	"types": "lib/index.d.ts",
 	"bin": {
-		"lint-commit-message": "bin/lint-commit-message",
-		"auto-npm-version": "bin/auto-npm-version"
+		"auto-npm-version": "bin/auto-npm-version",
+		"lint-commit-message": "bin/lint-commit-message"
 	},
 	"files": [
 		"lib",
 		"bin"
 	],
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
 	"scripts": {
 		"test": "vitest --no-watch",
 		"build": "rm -rf lib && find src -name '*.ts' ! -name '*.test.ts' | xargs esbuild --bundle --outdir=lib --platform=node --target=node22 --format=cjs --minify-whitespace",
@@ -44,5 +33,16 @@
 		"typescript": "^6.0.2",
 		"vite": "^8.0.5",
 		"vitest": "^4.1.2"
-	}
+	},
+	"devEngines": {
+		"runtime": {
+			"name": "node",
+			"version": "^24.14.0",
+			"onFail": "download"
+		}
+	},
+	"engines": {
+		"node": ">=22.0.0"
+	},
+	"packageManager": "npm@11.9.0"
 }

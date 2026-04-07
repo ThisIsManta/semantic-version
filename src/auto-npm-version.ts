@@ -1,5 +1,6 @@
-import isValidVersion from 'semver/functions/valid'
 import { context, getOctokit } from '@actions/github'
+import isValidVersion from 'semver/functions/valid'
+
 import { checkConventionalMessage } from './index'
 import { run } from './run'
 
@@ -7,7 +8,9 @@ export default async function main() {
 	// See https://github.com/actions/checkout#push-a-commit-using-the-built-in-token
 	const existingGitUserName = await run(`git config user.name`).catch(() => '')
 	if (!existingGitUserName) {
-		console.log('Setting Git commit author for further use in `npm version` and `git push` command...')
+		console.log(
+			'Setting Git commit author for further use in `npm version` and `git push` command...'
+		)
 
 		const name = context.payload.pusher?.name || context.actor
 		console.log('  user.name =', name)
@@ -19,7 +22,7 @@ export default async function main() {
 	}
 
 	console.log('Getting the remote repository...')
-	const remote = await run(`git remote`) || 'origin'
+	const remote = (await run(`git remote`)) || 'origin'
 	console.log('  remote =', remote)
 
 	if (!process.env.GITHUB_TOKEN) {
@@ -27,7 +30,9 @@ export default async function main() {
 	}
 
 	// See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#configuring-the-default-github_token-permissions
-	console.log('Checking if the current setup has the permission to push to the remote repository...')
+	console.log(
+		'Checking if the current setup has the permission to push to the remote repository...'
+	)
 	await run(`git push --dry-run ${remote}`)
 	console.log('  OK')
 
@@ -45,7 +50,9 @@ export default async function main() {
 		console.log('  Found 0 commits.')
 	} else {
 		for (const commit of commits) {
-			console.log(`  - ${commit.type}${commit.breaking ? '!' : ''}: ${commit.subject} (${commit.hash.substring(0, 7)})`)
+			console.log(
+				`  - ${commit.type}${commit.breaking ? '!' : ''}: ${commit.subject} (${commit.hash.substring(0, 7)})`
+			)
 		}
 	}
 
@@ -105,18 +112,16 @@ interface GitCommit {
 }
 
 async function getGitHistory(version: string): Promise<Array<GitCommit>> {
-	const tag = (
-		await run(`git tag --list v${version}`) ||
-		await run('git describe --tags --abbrev=0')
-	)
+	const tag =
+		(await run(`git tag --list v${version}`)) || (await run('git describe --tags --abbrev=0'))
 	return getCommits(await run(`git --no-pager log ${tag ? tag + '..HEAD' : ''} --format=%H%s`))
 }
 
 function getCommits(gitLogs: string) {
 	return gitLogs
 		.split('\n')
-		.filter(line => line.length > 0)
-		.map(line => ({
+		.filter((line) => line.length > 0)
+		.map((line) => ({
 			hash: line.substring(0, 40),
 			message: line.substring(40),
 		}))
@@ -146,9 +151,9 @@ export function getReleaseType(commits: Array<GitCommit>): string | null {
 function getReleaseNote(commits: Array<GitCommit>) {
 	const groups: Record<'BREAKING CHANGES' | 'Features' | 'Bug Fixes' | 'Others', typeof commits> = {
 		'BREAKING CHANGES': [],
-		'Features': [],
+		Features: [],
 		'Bug Fixes': [],
-		'Others': [],
+		Others: [],
 	}
 
 	for (const commit of commits) {
@@ -165,11 +170,9 @@ function getReleaseNote(commits: Array<GitCommit>) {
 
 	return Object.entries(groups)
 		.filter(([title, commits]) => commits.length > 0)
-		.map(([title, commits]) =>
-			`### ${title}\n\n` +
-			commits.map(({ subject, hash }) =>
-				`- ${subject} (${hash})`
-			).join('\n')
+		.map(
+			([title, commits]) =>
+				`### ${title}\n\n` + commits.map(({ subject, hash }) => `- ${subject} (${hash})`).join('\n')
 		)
 		.join('\n\n')
 }

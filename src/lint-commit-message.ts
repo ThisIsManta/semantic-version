@@ -1,4 +1,5 @@
 import * as fs from 'fs/promises'
+
 import { checkConventionalMessage } from './index'
 
 export default async function main(messageFilePath: string) {

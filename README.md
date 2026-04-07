@@ -5,12 +5,15 @@ The `<path>` must point to a text file containing commit message that complies w
 ```
 <type>[!]: <subject>
 ```
+
 Where
+
 - `<type>` can be either `feat`, `fix`, `build` or `chore`.
 - `!` indicates that the commit contains a breaking change.
 - `<subject>` is the actual commit message where the first word must be written in lower cases.
 
 > Usage example with [**lefthook**](https://www.npmjs.com/package/lefthook)
+>
 > ```yml
 > # lefthook.yml
 > commit-msg:
@@ -25,14 +28,15 @@ Where
 
 This command is supposed to be run on CI, such as **GitHub Actions**. It will run `npm version <new-version>`, which `<new-version>` is automatically derived from your commit messages according to the table below and then it creates a new entry on [**GitHub releases**](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
 
-|Commit message type|Post-commit command|
-|---|---|
-|`!`|`npm version major`|
-|`feat`|`npm version minor`|
-|`fix` or `build`|`npm version patch`|
-|Others|Does not run `npm version`|
+| Commit message type | Post-commit command        |
+| ------------------- | -------------------------- |
+| `!`                 | `npm version major`        |
+| `feat`              | `npm version minor`        |
+| `fix` or `build`    | `npm version patch`        |
+| Others              | Does not run `npm version` |
 
 > Usage example with **GitHub Actions**
+>
 > ```yml
 > # .github/workflows/push.yml
 > on:

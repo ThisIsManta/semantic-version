@@ -1,12 +1,15 @@
 {
 	"pre-commit": {
-		"parallel": true,
 		"commands": {
-			"build": {
-				"run": "npm run build"
+			"format": {
+				"run": "npx --yes oxfmt {staged_files}",
+				"stage_fixed": true
 			},
 			"test": {
 				"run": "npm test --ci --silent"
+			},
+			"build": {
+				"run": "npm run build"
 			}
 		}
 	},
