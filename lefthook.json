@@ -1,4 +1,11 @@
 {
+	"post-checkout": {
+		"commands": {
+			"install": {
+				"run": "npm install"
+			}
+		}
+	},
 	"pre-commit": {
 		"commands": {
 			"format": {
@@ -6,7 +13,7 @@
 				"stage_fixed": true
 			},
 			"test": {
-				"run": "npm test --ci --silent"
+				"run": "npm test -- --no-watch"
 			},
 			"build": {
 				"run": "npm run build"

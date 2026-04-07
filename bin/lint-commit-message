@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('../lib/lint-commit-message').default(process.argv.at(2))
+require('../lib/lint-commit-message')(process.argv.at(2))

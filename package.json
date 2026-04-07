@@ -18,8 +18,8 @@
 	"main": "lib/index.js",
 	"types": "lib/index.d.ts",
 	"scripts": {
-		"test": "tsc && vitest --no-watch",
-		"build": "rm -rf lib && find src -name '*.ts' ! -name '*.test.ts' | xargs esbuild --bundle --outdir=lib --platform=node --target=node22 --format=cjs --minify-whitespace",
+		"test": "tsc && vitest",
+		"build": "rm -rf lib && find src -name '*.ts' ! -name '*.test.ts' | xargs npm exec rolldown -- --transform.target node22 --format commonjs --dir lib --chunk-file-names [name].js",
 		"preversion": "npm run build",
 		"version": "npm publish --provenance --access public"
 	},
@@ -27,7 +27,6 @@
 		"@actions/github": "^9.0.0",
 		"@types/node": "~24.12.2",
 		"@types/semver": "^7.7.1",
-		"esbuild": "^0.28.0",
 		"lefthook": "^2.1.5",
 		"semver": "^7.7.4",
 		"typescript": "^6.0.2",
