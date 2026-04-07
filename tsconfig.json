@@ -5,16 +5,15 @@
 		"forceConsistentCasingInFileNames": true,
 		"module": "CommonJS",
 		"noUnusedLocals": true,
-		"outDir": "lib",
+		"outDir": "../lib",
 		"resolveJsonModule": true,
+		"rootDir": "src",
 		"skipLibCheck": true,
 		"strict": true,
-		"target": "ES2021"
+		"target": "ES2021",
+		"types": ["node"]
 	},
-	"include": [
-		"src"
-	],
 	"exclude": [
-		"src/*.test.*"
+		"*.test.*"
 	]
 }
