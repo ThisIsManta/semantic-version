@@ -10,6 +10,11 @@ import {
 } from './index'
 
 void (async function () {
+	const dryRun = process.argv.includes('--dry-run')
+	if (dryRun) {
+		console.log('⚠️  Running in dry-run mode.')
+	}
+
 	// See https://github.com/actions/checkout#push-a-commit-using-the-built-in-token
 	const existingGitUserName = await run(`git config user.name`).catch(() => '')
 	if (!existingGitUserName) {
@@ -29,6 +34,8 @@ void (async function () {
 	console.log('Getting the remote repository...')
 	const remote = (await run(`git remote`)) || 'origin'
 	console.log('  remote =', remote)
+	const branch = await run('git branch --show-current')
+	console.log('  branch =', branch)
 
 	if (!process.env.GITHUB_TOKEN) {
 		throw new Error('Expected the environment variable "GITHUB_TOKEN" to be set.')
@@ -38,7 +45,7 @@ void (async function () {
 	console.log(
 		'Checking if the current setup has the permission to push to the remote repository...'
 	)
-	await run(`git push --dry-run ${remote}`)
+	await run(`git push --dry-run ${remote} refs/heads/${branch}`)
 	console.log('  OK')
 
 	console.log('Getting the current package version...')
@@ -72,16 +79,20 @@ void (async function () {
 	}
 
 	console.log('Running `' + npm + ' version` command and its pre-post scripts...')
-	await run(`${npm} version ${releaseType} --git-tag-version --no-commit-hooks`)
-	console.log('  OK')
-
-	console.log('Pushing the new version to the remote repository...')
-	await run(`git push --follow-tags ${remote}`)
+	await run(
+		`${npm} version ${releaseType} --git-tag-version --no-commit-hooks ${dryRun ? '--dry-run --ignore-scripts' : ''}`
+	)
 	console.log('  OK')
 
 	console.log('Verifying the new version...')
 	const latestVersion = await getCurrentPackageVersion()
 	console.log('  version =', latestVersion ?? JSON.stringify(latestVersion))
+
+	console.log('Pushing the new version to the remote repository...')
+	await run(
+		`git push ${dryRun ? '--dry-run' : ''} --atomic ${remote} refs/heads/${branch} refs/tags/v${latestVersion}`
+	)
+	console.log('  OK')
 
 	console.log('Creating a release note on GitHub...')
 	const releaseNote = getReleaseNote(commits)
@@ -93,6 +104,7 @@ void (async function () {
 		tag_name: 'v' + latestVersion,
 		body: releaseNote,
 		make_latest: 'legacy',
+		draft: dryRun,
 	})
 	console.log('  ' + releaseCreationRespond.data.html_url)
 

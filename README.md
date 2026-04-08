@@ -28,9 +28,9 @@ commit-msg:
 
 ---
 
-### `npx make-next-release`
+### `npx make-next-release [--dry-run]`
 
-This command is supposed to be run on **GitHub Actions**. It will run `npm version <new-version>`, which `<new-version>` is automatically derived from your commit messages according to the table below and then it creates a new entry on [**GitHub releases**](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
+This command is supposed to be run on **GitHub Actions**. It will run `npm version <new-version>`, which `<new-version>` is automatically derived from your commit messages according to the table below and then it creates a new entry on [**GitHub Releases**](https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases).
 
 | Commit message type | Trigger                    |
 | ------------------- | -------------------------- |
@@ -43,11 +43,14 @@ This command is supposed to be run on **GitHub Actions**. It will run `npm versi
 // package.json
 {
 	"scripts": {
-		"version": "npm run build",
+		"preversion": "npm run test",
+		"version": "npm run build && git add lib",
 		"postversion": "npm publish"
 	}
 }
 ```
+
+By supplying `--dry-run` argument, it uses `git push --dry-run`, `npm version --ignore-scripts` and creates a new _draft_ **GitHub Release** entry instead, which you may want to [manually delete the _draft_ release](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#deleting-a-release) afterward.
 
 ```yml
 # .github/workflows/push.yml
@@ -55,22 +58,24 @@ on:
    push:
      branches: [master]
 
+permissions:
+  contents: write # Grant Git push and GitHub Release write access to GITHUB_TOKEN
+
  jobs:
    release:
      runs-on: ubuntu-latest
      steps:
        - uses: actions/checkout@v6
          with:
-           fetch-depth: 0 # Ensure Git tags are fetched
+           fetch-depth: 0 # Ensure entire Git history and Git tags are accessible
 
        - uses: actions/setup-node@v6
          with:
-           node-version-file: 'package.json'
-           cache: npm
+           node-version: 22
 
-       - run: npm ci # Install semantic-version as part of the dependencies
+       - run: npm install @thisismanta/semantic-version@11
 
        - run: npx make-next-release
          env:
-           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Make it possible to create a new release using GitHub API
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
