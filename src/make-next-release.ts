@@ -9,7 +9,7 @@ import {
 	getReleaseNote,
 } from './index'
 
-;(async function () {
+void (async function () {
 	// See https://github.com/actions/checkout#push-a-commit-using-the-built-in-token
 	const existingGitUserName = await run(`git config user.name`).catch(() => '')
 	if (!existingGitUserName) {
@@ -31,7 +31,7 @@ import {
 	console.log('  remote =', remote)
 
 	if (!process.env.GITHUB_TOKEN) {
-		throw new Error('Expected "GITHUB_TOKEN" to be set in the environment variables.')
+		throw new Error('Expected the environment variable "GITHUB_TOKEN" to be set.')
 	}
 
 	// See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/enabling-features-for-your-repository/managing-github-actions-settings-for-a-repository#configuring-the-default-github_token-permissions

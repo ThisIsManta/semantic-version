@@ -40,12 +40,12 @@ This command is supposed to be run on **GitHub Actions**. It will run `npm versi
 | Others              | Does not run `npm version` |
 
 ```json
-# package.json
+// package.json
 {
-  "scripts": {
-    "version": "npm run build",
-    "postversion": "npm publish"
-  }
+	"scripts": {
+		"version": "npm run build",
+		"postversion": "npm publish"
+	}
 }
 ```
 

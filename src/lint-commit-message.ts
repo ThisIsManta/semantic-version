@@ -2,7 +2,7 @@ import * as fs from 'node:fs/promises'
 
 import { checkConventionalMessage } from './index'
 
-;(async () => {
+void (async () => {
 	const messageFilePath = process.argv[2]
 
 	console.log('Verifying the commit message...')

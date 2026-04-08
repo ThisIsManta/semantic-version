@@ -1,5 +1,6 @@
 {
 	"search.exclude": {
 		"lib": true
-	}
+	},
+	"editor.defaultFormatter": "oxc.oxc-vscode"
 }

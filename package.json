@@ -28,6 +28,7 @@
 		"@types/node": "~24.12.2",
 		"@types/semver": "^7.7.1",
 		"lefthook": "^2.1.5",
+		"oxfmt": "^0.44.0",
 		"semver": "^7.7.4",
 		"typescript": "^6.0.2",
 		"vite": "^8.0.5",
