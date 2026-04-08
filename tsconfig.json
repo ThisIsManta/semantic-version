@@ -1,18 +1,16 @@
 {
 	"compilerOptions": {
 		"declaration": true,
+		"emitDeclarationOnly": true,
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"module": "CommonJS",
-		"noEmit": true,
 		"noUnusedLocals": true,
-		"outDir": "../lib",
-		"resolveJsonModule": true,
 		"rootDir": "src",
 		"skipLibCheck": true,
 		"strict": true,
-		"target": "ES2021",
+		"target": "ES2022",
 		"types": ["node"]
 	},
-	"exclude": ["*.test.*"]
+	"exclude": ["src/*.test.ts"]
 }

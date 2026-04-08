@@ -39,6 +39,16 @@ This command is supposed to be run on **GitHub Actions**. It will run `npm versi
 | `fix` or `build`    | `npm version patch`        |
 | Others              | Does not run `npm version` |
 
+```json
+# package.json
+{
+  "scripts": {
+    "version": "npm run build",
+    "postversion": "npm publish"
+  }
+}
+```
+
 ```yml
 # .github/workflows/push.yml
 on:

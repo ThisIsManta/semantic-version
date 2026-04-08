@@ -18,10 +18,10 @@
 	"main": "lib/index.js",
 	"types": "lib/index.d.ts",
 	"scripts": {
-		"test": "tsc && vitest",
-		"build": "rm -rf lib && find src -name '*.ts' ! -name '*.test.ts' | xargs npm exec rolldown -- --transform.target node22 --format commonjs --dir lib --chunk-file-names [name].js",
-		"preversion": "npm run build",
-		"version": "npm publish --provenance --access public"
+		"test": "vitest",
+		"build": "rm -rf lib && tsc --outDir lib && find src -name '*.ts' ! -name '*.test.ts' | xargs npm exec rolldown -- --transform.target node22 --format commonjs --dir lib --chunk-file-names [name].js",
+		"version": "npm run build",
+		"postversion": "npm publish --provenance --access public"
 	},
 	"devDependencies": {
 		"@actions/github": "^9.0.0",

@@ -1,12 +1,15 @@
-import * as process from 'node:process'
-
 import { context, getOctokit } from '@actions/github'
-import isValidVersion from 'semver/functions/valid'
 
-import { checkConventionalMessage } from './index'
-import { run, npm } from './run'
+import {
+	run,
+	npm,
+	getCurrentPackageVersion,
+	getGitHistory,
+	getReleaseType,
+	getReleaseNote,
+} from './index'
 
-export default async function () {
+;(async function () {
 	// See https://github.com/actions/checkout#push-a-commit-using-the-built-in-token
 	const existingGitUserName = await run(`git config user.name`).catch(() => '')
 	if (!existingGitUserName) {
@@ -95,86 +98,4 @@ export default async function () {
 
 	console.log('')
 	console.log('Done with the new version.')
-}
-
-async function getCurrentPackageVersion() {
-	const version = JSON.parse(await run(`${npm} pkg get version`))
-	if (typeof version === 'string' && isValidVersion(version)) {
-		return version
-	} else {
-		throw new Error('Expected a valid version field in package.json.')
-	}
-}
-
-interface GitCommit {
-	hash: string
-	type: string | undefined
-	breaking: boolean
-	subject: string
-}
-
-async function getGitHistory(version: string): Promise<Array<GitCommit>> {
-	const tag =
-		(await run(`git tag --list v${version}`)) || (await run('git describe --tags --abbrev=0'))
-	return getCommits(await run(`git --no-pager log ${tag ? tag + '..HEAD' : ''} --format=%H%s`))
-}
-
-function getCommits(gitLogs: string) {
-	return gitLogs
-		.split('\n')
-		.filter((line) => line.length > 0)
-		.map((line) => ({
-			hash: line.substring(0, 40),
-			message: line.substring(40),
-		}))
-		.filter(({ message }) => isValidVersion(message) === null)
-		.map(({ hash, message }): GitCommit => {
-			const { type, breaking, subject } = checkConventionalMessage(message)
-			return { hash, type, breaking, subject }
-		})
-}
-
-export function getReleaseType(commits: Array<GitCommit>): string | null {
-	if (commits.find(({ breaking }) => breaking)) {
-		return 'major'
-	}
-
-	if (commits.find(({ type }) => type === 'feat')) {
-		return 'minor'
-	}
-
-	if (commits.find(({ type }) => type === 'fix' || type === 'build')) {
-		return 'patch'
-	}
-
-	return null
-}
-
-function getReleaseNote(commits: Array<GitCommit>) {
-	const groups: Record<'BREAKING CHANGES' | 'Features' | 'Bug Fixes' | 'Others', typeof commits> = {
-		'BREAKING CHANGES': [],
-		Features: [],
-		'Bug Fixes': [],
-		Others: [],
-	}
-
-	for (const commit of commits) {
-		if (commit.breaking) {
-			groups['BREAKING CHANGES'].push(commit)
-		} else if (commit.type === 'feat') {
-			groups['Features'].push(commit)
-		} else if (commit.type === 'fix') {
-			groups['Bug Fixes'].push(commit)
-		} else {
-			groups['Others'].push(commit)
-		}
-	}
-
-	return Object.entries(groups)
-		.filter(([title, commits]) => commits.length > 0)
-		.map(
-			([title, commits]) =>
-				`### ${title}\n\n` + commits.map(({ subject, hash }) => `- ${subject} (${hash})`).join('\n')
-		)
-		.join('\n\n')
-}
+})()

@@ -2,7 +2,9 @@ import * as fs from 'node:fs/promises'
 
 import { checkConventionalMessage } from './index'
 
-export default async function (messageFilePath: string) {
+;(async () => {
+	const messageFilePath = process.argv[2]
+
 	console.log('Verifying the commit message...')
 	const message = (await fs.readFile(messageFilePath, 'utf-8')).trim()
 	console.log('  input =', message)
@@ -13,4 +15,4 @@ export default async function (messageFilePath: string) {
 	}
 
 	process.exitCode = errors.length
-}
+})()
