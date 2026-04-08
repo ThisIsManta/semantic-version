@@ -2,22 +2,39 @@ import * as cp from 'node:child_process'
 import * as fs from 'node:fs'
 
 import isValidVersion from 'semver/functions/valid'
+import yn from 'yn'
+
+// See https://docs.github.com/en/actions/how-tos/monitor-workflows/enable-debug-logging
+const debuggingEnabled =
+	yn(process.env.DEBUG) ||
+	yn(process.env.ACTIONS_RUNNER_DEBUG) ||
+	yn(process.env.ACTIONS_STEP_DEBUG)
+
+export function debug(text: string | number) {
+	if (debuggingEnabled) {
+		console.log('::debug::' + text)
+	}
+}
 
 export function run(command: string): Promise<string> {
 	return new Promise<string>((resolve, reject) => {
 		cp.exec(command, (error, stdout, stderr) => {
-			console.log('::debug::' + command)
-			console.log('::debug::Output:')
-			console.log('::debug::=>', stdout)
-			if (stderr.trim().length > 0) {
-				console.log('::debug::Error:')
-				console.log('::debug::=>', stderr)
+			debug('> ' + command)
+
+			stdout = stdout.trim()
+			if (stdout.length > 0) {
+				debug(stdout)
+			}
+
+			stderr = stderr.trim()
+			if (stderr.length > 0) {
+				debug(stderr)
 			}
 
 			if (error) {
 				reject(error)
 			} else {
-				resolve(stdout.trim())
+				resolve(stdout)
 			}
 		})
 	})
