@@ -22,7 +22,7 @@ import {
 		await run(`git config user.name ${name}`)
 
 		const email = context.payload.pusher?.email || 'github-actions@github.com'
-		console.log('  user.email =', name)
+		console.log('  user.email =', email)
 		await run(`git config user.email ${email}`)
 	}
 
