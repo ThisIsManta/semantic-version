@@ -40,11 +40,17 @@ export function run(command: string): Promise<string> {
 	})
 }
 
-const packageJSON = JSON.parse(fs.readFileSync('./package.json', { encoding: 'utf-8' }))
+const packageJSON = ((): any => {
+	try {
+		return JSON.parse(fs.readFileSync('./package.json', { encoding: 'utf-8' }))
+	} catch {
+		return {}
+	}
+})()
 
 export const npm: string =
-	packageJSON?.packageManager?.replace(/@.*$/, '') ??
-	packageJSON?.devEngines?.packageManager?.name ??
+	('packageManager' in packageJSON && packageJSON.packageManager?.replace(/@.*$/, '')) ||
+	('devEngines' in packageJSON && packageJSON.devEngines?.packageManager?.name) ||
 	'npm'
 
 const titlePattern = /^(?<type>\w+)(?<scope>\(.*?\))?(?<breaking>\!)?:(?<subject>.+)/
