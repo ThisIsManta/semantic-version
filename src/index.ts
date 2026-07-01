@@ -29,7 +29,13 @@ export function run(command: string): Promise<string> {
 			}
 
 			if (error) {
-				reject(error)
+				if (debuggingEnabled && stdout.includes('[ERR_PNPM_UNCLEAN_WORKING_TREE]')) {
+					run('git --no-pager diff').finally(() => {
+						reject(error)
+					})
+				} else {
+					reject(error)
+				}
 			} else {
 				resolve(stdout)
 			}
