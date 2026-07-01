@@ -9,7 +9,7 @@
 	"pre-commit": {
 		"commands": {
 			"format": {
-				"run": "npm exec oxfmt -- {staged_files}",
+				"run": "npm exec oxfmt --no-error-on-unmatched-pattern -- {staged_files}",
 				"stage_fixed": true
 			},
 			"test": {
