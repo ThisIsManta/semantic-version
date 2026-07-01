@@ -18,7 +18,7 @@ export function run(command: string): Promise<string> {
 			}
 
 			if (error) {
-				console.log('::error::', error.message)
+				console.log('::error::', error.message.trim())
 				if (!debugging && stdout.length > 0) {
 					console.log(stdout)
 				}

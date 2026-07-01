@@ -16,7 +16,7 @@ void (async function () {
 	}
 
 	// See https://github.com/actions/checkout#push-a-commit-using-the-built-in-token
-	const existingGitUserName = await run(`git config user.name`).catch(() => '')
+	const existingGitUserName = await run(`git config user.name || true`)
 	if (!existingGitUserName) {
 		console.log(
 			'Setting Git commit author for further use in `' + npm + ' version` and `git push` command...'
