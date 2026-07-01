@@ -130,8 +130,10 @@ export function getReleaseType(commits: Array<GitCommit>): string | null {
 }
 
 export async function getCurrentPackageVersion() {
-	const version = JSON.parse(await run(`${npm} pkg get version`))
-	if (typeof version === 'string' && isValidVersion(version)) {
+	// Do not use `packageJSON.version` as it is might hold a stale value by the time we run this function
+	// Note that pnpm v11 returns the value without double quotes
+	const version = (await run(`${npm} pkg get version`)).trim().replace(/^"/, '').replace(/"$/, '')
+	if (isValidVersion(version)) {
 		return version
 	} else {
 		throw new Error('Expected a valid version field in package.json.')
