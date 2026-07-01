@@ -5,26 +5,23 @@ import isValidVersion from 'semver/functions/valid'
 import yn from 'yn'
 
 // See https://github.com/actions/toolkit/blob/cf80afb3922317b98dd74d27cba7cf1032c1fe50/packages/core/src/core.ts#L259
-const debuggingEnabled = yn(process.env.DEBUG) || yn(process.env.RUNNER_DEBUG)
+const debugging = yn(process.env.DEBUG) || yn(process.env.RUNNER_DEBUG)
 
 export function run(command: string): Promise<string> {
 	return new Promise<string>((resolve, reject) => {
 		cp.exec(command, (error, stdout, stderr) => {
 			stdout = stdout.trim()
 
-			if (debuggingEnabled) {
+			if (debugging) {
 				console.log('::debug::»' + command)
-				console.log('::debug::»', stdout)
+				console.log('::debug::', stdout)
 			}
 
 			if (error) {
-				if (!debuggingEnabled) {
-					console.log('»', command)
-					if (stdout.length > 0) {
-						console.log('»', stdout)
-					}
+				console.log('::error::', error.message)
+				if (!debugging && stdout.length > 0) {
+					console.log(stdout)
 				}
-				console.log('::error::»', error.message)
 				console.log(stderr.trimEnd())
 
 				reject(error)
