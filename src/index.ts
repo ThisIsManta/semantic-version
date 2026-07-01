@@ -7,35 +7,27 @@ import yn from 'yn'
 // See https://github.com/actions/toolkit/blob/cf80afb3922317b98dd74d27cba7cf1032c1fe50/packages/core/src/core.ts#L259
 const debuggingEnabled = yn(process.env.DEBUG) || yn(process.env.RUNNER_DEBUG)
 
-const debug: (text: string) => void = debuggingEnabled
-	? (text) => {
-			console.log('::debug::' + text)
-		}
-	: () => {}
-
 export function run(command: string): Promise<string> {
 	return new Promise<string>((resolve, reject) => {
 		cp.exec(command, (error, stdout, stderr) => {
-			debug('Run » ' + command)
-
 			stdout = stdout.trim()
-			if (stdout.length > 0) {
-				debug('Output » ' + stdout)
-			}
 
-			stderr = stderr.trim()
-			if (stderr.length > 0) {
-				debug('Error » ' + stderr)
+			if (debuggingEnabled) {
+				console.log('::debug::»' + command)
+				console.log('::debug::»', stdout)
 			}
 
 			if (error) {
-				if (debuggingEnabled && stdout.includes('[ERR_PNPM_UNCLEAN_WORKING_TREE]')) {
-					run('git --no-pager diff').finally(() => {
-						reject(error)
-					})
-				} else {
-					reject(error)
+				if (!debuggingEnabled) {
+					console.log('»', command)
+					if (stdout.length > 0) {
+						console.log('»', stdout)
+					}
 				}
+				console.log('::error::»', error.message)
+				console.log(stderr.trimEnd())
+
+				reject(error)
 			} else {
 				resolve(stdout)
 			}
