@@ -80,7 +80,7 @@ void (async function () {
 
 	console.log('Running `' + npm + ' version` command and its pre-post scripts...')
 	await run(
-		`${npm} version ${releaseType} --git-tag-version --no-commit-hooks ${dryRun ? '--dry-run --ignore-scripts' : ''}`
+		`${npm} version ${releaseType} --no-commit-hooks ${dryRun ? '--dry-run --ignore-scripts' : ''}`
 	)
 	console.log('  OK')
 
